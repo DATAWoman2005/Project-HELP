@@ -1,0 +1,185 @@
+# Exploratory Data Analysis on Country Data.
+
+Based on their socio-economic and health factors...
+
+### Import Libraries
+
+```{r}
+library(dplyr) # for data manipulation and analysis
+library(ggplot2) # for data visalization
+library(moments) # to calculate skewness
+options(scipen = 999) # to disable scientific numbers
+```
+
+### Data Collection
+
+```{r}
+cnt_data <- readr::read_csv(".\\data\\Country-data.csv")
+```
+
+### Data Information
+
+```{r}
+# first 5 first
+head(cnt_data)
+```
+
+```{r}
+# Structure of the dataset
+str(cnt_data)
+```
+
+```{r}
+# Missing Values
+sum(is.na(cnt_data))
+```
+
+```{r}
+colnames(cnt_data)
+```
+
+### Insights to gather
+
+#### Taking a look at the column definitions
+
+```{r}
+data_dict <- readr::read_csv(".\\data\\data-dictionary.csv")
+```
+
+```{r}
+cnt_data[cnt_data$fertility_group == "High Fertility", c("country", "total_fer")]
+```
+
+**1. Distribution of GDP per capita (`gdpp`):** Checking how skewed the GDP per capita is
+
+```{r}
+hist(cnt_data$gdpp, breaks = 30, col = "skyblue", main = "Distribution of GDP per Capita", xlab = "GDP per Capita", ylab = "Number of Countries")
+skewness(cnt_data$gdpp)
+summary(cnt_data$gdpp)
+
+# The histogram shows a right skewed distribution. Most countries have relatively low GDP per capita (below $5,000), while a few countries are extremely wealthy, pushing the upper range beyond $100,000, showing a significant global economic disparity.
+# Majority of the countries which we can give HELP to are those on the low side where the individuals in those countries don't generate enough income.
+```
+
+**2. Relationship between GDP per capita (`gdpp)` and Life Expectancy (`life_expec`)**
+
+```{r}
+plot(cnt_data$gdpp, cnt_data$life_expec, 
+     main = "GDP per Capita vs Life Expectancy", 
+     xlab = "GDP per Capita", 
+     ylab = "Life Expectancy", 
+     col = "darkgreen", pch = 16)
+abline(lm(life_expec ~ gdpp, data = cnt_data), col = "red", lwd = 2)
+
+cor(cnt_data$gdpp, cnt_data$life_expec)
+
+# The scatter plot reveals a positive correlation between a country's GDP per capita and its average life expectancy. This suggests that higher economic prosperity often leads to better healthcare, nutrition, and living conditions, contributing to longer lives.
+```
+
+**3. Average Child Mortality by Income Level**
+
+```{r}
+# Create income groups based on quantiles
+cnt_data$income_group <- cut(cnt_data$income, breaks = quantile(cnt_data$income, probs = c(0, 0.33, 0.66, 1)), labels = c("Low Income", "Middle Income", "High Income"), include.lowest = TRUE)
+
+# Aggregate: average child mortality by income group
+cm_ig_agg <- aggregate(child_mort ~ income_group, data = cnt_data, FUN = mean)
+print(cm_ig_agg)
+
+# Bar plot
+barplot(cm_ig_agg$child_mort,
+        names.arg = cm_ig_agg$income_group,
+        col = "red",
+        main = "Average Child Mortality by Income Group",
+        ylab = "Avg. Child Mortality",
+        xlab = "Income Group",
+        ylim = c(0, max(cm_ig_agg$child_mort) * 1.3))
+
+# The bar chart shows that child mortality decreases significantly as income level increases.
+
+# Countries in the low-income group have the highest average child mortality, while high-income countries experience the lowest, highlighting how economic status affects child survival rates.
+```
+
+**4.** **Relationship Between Health Expenditure (`health`) and Life Expectancy (`life_expec`)**
+
+```{r}
+plot(cnt_data$health, cnt_data$life_expec,
+     main = "Health Expenditure vs Life Expectancy",
+     xlab = "Health Expenditure (% of GDP)",
+     ylab = "Life Expectancy",
+     col = "lightgreen", pch = 19)
+abline(lm(life_expec ~ health, data = cnt_data), col = "red", lwd = 2)
+cor(cnt_data$health, cnt_data$life_expec)
+
+# Although there is a slight upward trend, the weak correlation (0.21) shows that health spending alone doesn’t strongly predict life expectancy across countries. This highlights the importance of how resources are used, not just how much is spent.
+```
+
+**5. Distribution of inflation rates**
+
+```{r}
+hist(cnt_data$inflation,
+     main = "Distribution of Inflation Rates",
+     xlab = "Inflation Rate (%)",
+     ylab = "Number of Countries",
+     col = "orange",
+     border = "white",
+     breaks = 25)
+summary(cnt_data$inflation)
+skewness(cnt_data$inflation)
+
+# The histogram shows that most countries have moderate inflation, with a few outliers having very high or very low rates.
+
+# The distribution is right-skewed, meaning a few countries experience extremely high inflation, and the issue of economic instability could be said to be present in those regions. The outliers with negative(lower than 0) rates could be said to be experiencing deflation
+```
+
+**6. Relationship Between Exports and Imports (as % of GDP)**
+
+```{r}
+plot(cnt_data$exports, cnt_data$imports,
+     main = "Exports vs Imports (% of GDP)",
+     xlab = "Exports (% of GDP)", ylab = "Imports (% of GDP)",
+     col = "purple", pch = 16)
+
+# Add a regression line
+abline(lm(imports ~ exports, data = cnt_data), col = "red", lwd = 2)
+cor(cnt_data$exports, cnt_data$imports)
+
+# The significant positive correlation indicates that countries that export more tend to also rely on imports, either for raw materials, intermediate goods, or consumption.
+```
+
+**7. Compare Average GDP per Capita Across Fertility Rate Levels**
+
+```{r}
+# Create fertility groups based on quantiles
+cnt_data$fertility_group <- cut(cnt_data$total_fer,
+                                breaks = quantile(cnt_data$total_fer, probs = c(0, 0.33, 0.66, 1)),
+                                labels = c("Low Fertility", "Medium Fertility", "High Fertility"),
+                                include.lowest = TRUE)
+
+# Aggregate: average GDP per capita by fertility group
+fert_gdp <- aggregate(gdpp ~ fertility_group, data = cnt_data, FUN = mean)
+print(fert_gdp)
+
+# Bar plot
+barplot(fert_gdp$gdpp,
+        names.arg = fert_gdp$fertility_group,
+        col = "skyblue",
+        main = "Average GDP per Capita by Fertility Group",
+        ylab = "Avg. GDP per Capita",
+        xlab = "Fertility Group")
+
+# This insight shows that countries with lower fertility rates tend to have higher GDP per capita, reflecting an inverse relationship where wealthier nations generally have fewer children per woman, possibly due to better education, development and access to healthcare.
+```
+
+#### 8. Relationship between total fertility and child mortality
+
+```{r}
+plot(cnt_data$total_fer, cnt_data$child_mort,
+     main = "Total Fertility Vs Child Mortality",
+     xlab = "Total Fertility",
+     ylab = "Child Mortality",
+     col = 'Red', pch = 16)
+abline(lm(child_mort ~ total_fer, data = cnt_data), col = 'blue', lwd = 2)
+
+cor(cnt_data$total_fer, cnt_data$child_mort)
+```

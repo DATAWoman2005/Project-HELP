@@ -14,8 +14,8 @@ country_data_shuffle <- country_data[sample(nrow(country_data)), ]
                                   
 
 # Store country names for later use
-country_names <- country_data$country
-country_data <- country_data %>% select(-country) # Remove country column
+country_names <- country_data_shuffle$country
+country_data <- country_data_shuffle %>% select(-country) # Remove country column
 
 print("\nSummary statistics of the data:")
 print(summary(country_data))

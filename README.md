@@ -4,6 +4,8 @@
 
 **Data Source:** [Unsupervised Learning on Country Data](https://www.kaggle.com/datasets/rohan0301/unsupervised-learning-on-country-data)
 
+**Explore the data and the model from [here](https://datawoman2005.shinyapps.io/HELP_app/).**
+
 ------------------------------------------------------------------------
 
 ## 1. Introduction & Problem Definition
@@ -274,11 +276,11 @@ Based on the `unscaled_cluster_centers` (which you provided earlier), we interpr
 
 **Unscaled Cluster Centers (Reference from previous output):**
 
-| Cluster | child_mort | exports | health | imports | income   | inflation | life_expec | total_fer | gdpp     |
+| Cluster | child_mort | exports | health | imports | income | inflation | life_expec | total_fer | gdpp |
 |:-------|:-------|:-------|:-------|:-------|:-------|:-------|:-------|:-------|:-------|
-| **1**   | 5.00       | 58.74   | 8.81   | 51.49   | 45672.22 | 2.67      | 80.13      | 1.75      | 42494.44 |
-| **2**   | 21.93      | 40.24   | 6.20   | 47.47   | 12305.60 | 7.60      | 72.81      | 2.31      | 6486.45  |
-| **3**   | 92.96      | 29.15   | 6.39   | 42.32   | 3942.40  | 12.02     | 59.19      | 5.01      | 1922.38  |
+| **1** | 5.00 | 58.74 | 8.81 | 51.49 | 45672.22 | 2.67 | 80.13 | 1.75 | 42494.44 |
+| **2** | 21.93 | 40.24 | 6.20 | 47.47 | 12305.60 | 7.60 | 72.81 | 2.31 | 6486.45 |
+| **3** | 92.96 | 29.15 | 6.39 | 42.32 | 3942.40 | 12.02 | 59.19 | 5.01 | 1922.38 |
 
 **Interpretation and Labeling:**
 

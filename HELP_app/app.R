@@ -10,6 +10,7 @@ library(DT)         # For interactive data tables
 library(leaflet)    # For interactive maps
 library(sf)         # For spatial data manipulation
 library(rnaturalearth) # For world map data
+library(rnaturalearthdata)
 library(countrycode) # For robust country name matching
 library(plotly)     # For interactive ggplot2 plots (hover effects)
 library(cluster)    # For silhouette analysis
@@ -23,7 +24,7 @@ options(scipen = 999)
 # IMPORTANT: Ensure 'Country-data-clustered.csv' and 'data-dictionary.csv'
 # are in the same directory as this app.R file, or update the paths.
 # The clustered data now includes the 'Remarks' column
-cnt_data_raw <- readr::read_csv("..\\data\\Country-data-clustered.csv")
+cnt_data_raw <- readr::read_csv("Country-data-clustered.csv")
 
 # Ensure 'Remarks' is a factor with specific levels for consistent plotting
 if ("Remarks" %in% colnames(cnt_data_raw)) {

@@ -6,16 +6,15 @@ library(factoextra) # For visualizing clustering results
 library(NbClust)    # For helping determine the number of clusters
 
 # Load the data
-country_data <- readr::read_csv(".\\Unsupervised-ML-with-R\\data\\Country-data.csv")
+country_data <- readr::read_csv(".\\data\\Country-data.csv")
 
 # shuffling the dataset
-set.seed(30) # FOR  REPRODUCIBILITY
-country_data_shuffle <- country_data[sample(nrow(country_data)), ]   
-                                  
+set.seed(30) # FOR REPRODUCIBILITY
+country_data_shuffle <- country_data[sample(nrow(country_data)), ]
 
 # Store country names for later use
-country_names <- country_data_shuffle$country
-country_data <- country_data_shuffle %>% select(-country) # Remove country column
+country_names <- country_data$country
+country_data <- country_data %>% select(-country) # Remove country column
 
 print("\nSummary statistics of the data:")
 print(summary(country_data))
@@ -33,19 +32,19 @@ print(summary(scaled_country_data))
 # --- Determining the Optimal Number of Clusters (k) for K-Means ---
 wss <- numeric(20)
 for (i in 1:20) {
-  kmeans_result <- kmeans(scaled_country_data, centers = i, nstart = 10)
-  wss[i] <- sum(kmeans_result$withinss)
+   kmeans_result <- kmeans(scaled_country_data, centers = i, nstart = 10)
+   wss[i] <- sum(kmeans_result$withinss)
 }
 
 # Now, the elbow plot should work correctly with this 'wss' vector
 elbow_plot <- ggplot(data.frame(clusters = 1:20, WSS = wss), aes(x = clusters, y = WSS)) +
-  geom_line() +
-  geom_point() +
-  geom_vline(xintercept = 3, linetype = "dashed", color = "red") + # Indicating k=3
-  labs(title = "Elbow Method for Optimal k",
-       x = "Number of Clusters (k)",
-       y = "Within-Cluster Sum of Squares (WSS)") +
-  theme_minimal()
+   geom_line() +
+   geom_point() +
+   geom_vline(xintercept = 3, linetype = "dashed", color = "red") + # Indicating k=3
+   labs(title = "Elbow Method for Optimal k",
+        x = "Number of Clusters (k)",
+        y = "Within-Cluster Sum of Squares (WSS)") +
+   theme_minimal()
 
 print(elbow_plot)
 
@@ -62,7 +61,7 @@ for (i in 2:10) {
 silhouette_plot <- ggplot(data.frame(clusters = 2:10, Silhouette = silhouette_scores), aes(x = clusters, y = Silhouette)) +
    geom_line() +
    geom_point() +
-   geom_vline(xintercept = 3, linetype = "dashed", color = "red") + # Indicating k=3
+   # geom_vline(xintercept = 3, linetype = "dashed", color = "red") + # Indicating k=3
    labs(title = "Silhouette Analysis for Optimal k",
         x = "Number of Clusters (k)",
         y = "Average Silhouette Width") +
@@ -91,14 +90,21 @@ print(cluster_centers)
 
 # Add cluster assignments back to the original (unscaled) data for interpretation
 clustered_data <- cbind(country_data, Cluster = as.factor(cluster_assignments))
-clustered_data_with_names <- cbind(data.frame(country = country_names), clustered_data)
+clustered_data <- cbind(data.frame(country = country_names), clustered_data)
+# Rename the the cluster column to remark
+clustered_data <- clustered_data |> rename(Remarks = Cluster)
+# Adding a categorical remark
+clustered_data <- clustered_data %>%
+   mutate(Remarks = case_when(
+      Remarks == 1 ~ "Low Priority",
+      Remarks == 2 ~ "Mid Priority",
+      Remarks == 3 ~ "High Priority"
+   ))
 
-print("\nData with Cluster Assignments:")
-print(head(clustered_data_with_names))
-
+# Save as a csv file for deployment.
+write.csv(clustered_data, ".\\data\\Country-data-clustered.csv")
 # Interpreting the Clusters
-# We need to analyze the cluster centers to understand the characteristics
-# of each cluster in terms of the original features. Let's unscale the
+# We need to analyze the cluster centers to understand the characteristics of each cluster in terms of the original features. Let's unscale the
 # cluster centers to make them more interpretable.
 
 # unscale data
@@ -119,6 +125,3 @@ for (i in 1:ncol(country_data)) {
 }
 
 print("\nUnscaled K-Means Cluster Centers (Approximation of Original Values):")
-print(unscaled_cluster_centers)
-
-
